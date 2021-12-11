@@ -13,15 +13,18 @@ func main() {
 	topic := "test"
 	fmt.Println(util.MACONSTANTE)
 	util.AfficherUnTruc()
-	client := connect("tcp://localhost:1883", "go_mqtt_client2")
-	//token := client.Subscribe(topic, 1, nil)
-	//token.Wait()
-	for i := 0; i < 10; i++ {
-		text := fmt.Sprintf("Ma publication %d", i)
-		client.Publish(topic, 2, false, text)
-		time.Sleep(time.Second)
+	client := connect("tcp://localhost:1883", "go_mqtt_client")
+	token := client.Subscribe(topic, 2, messagePubHandler)
+
+	for {
+		token.Wait()
 	}
 
+	//client.Disconnect(250)
+}
+
+var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	fmt.Printf("Received message: %s from topic: %s\n", msg.Payload(), msg.Topic())
 }
 
 func createClientOptions(brokerURI string, clientId string) *mqtt.ClientOptions {
